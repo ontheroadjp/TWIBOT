@@ -19,5 +19,8 @@
   "homepage": "https://github.com/ontheroadjp/Tweet-Bot#readme",
   "devDependencies": {
     "twit": "^2.2.11"
+  },
+    "engines": {
+    "node": "16.x"
   }
 }
