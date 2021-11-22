@@ -17,10 +17,10 @@
     "url": "https://github.com/ontheroadjp/Tweet-Bot/issues"
   },
   "homepage": "https://github.com/ontheroadjp/Tweet-Bot#readme",
-  "devDependencies": {
-    "twit": "^2.2.11"
-  },
-    "engines": {
+  "engines": {
     "node": "16.x"
+  },
+  "dependencies": {
+    "twit": "^2.2.11"
   }
 }
