@@ -2,7 +2,6 @@ const app = require('../app');
 const Twit = require('twit');
 const CronJob = require('cron').CronJob;
 const moment = require('moment');
-//const T = new Twit(require('./config.js'));
 
 const T = new Twit({
     consumer_key: app.get('options').key,
