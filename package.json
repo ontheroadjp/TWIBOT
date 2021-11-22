@@ -1,5 +1,8 @@
 {
-  "devDependencies": {
-    "twit": "^2.2.11"
-  }
+    "scripts": {
+        "start": "node bot.js"
+    },
+    "devDependencies": {
+        "twit": "^2.2.11"
+    }
 }
