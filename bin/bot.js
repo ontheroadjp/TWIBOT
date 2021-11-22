@@ -14,19 +14,20 @@ function log(msg) {
     console.log(new Date() + ": " + msg);
 }
 
-function tweetMessage(msg) {
+function tweetMessage(msg, repeater) {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
         if (response) {
-            log('OK tweet messages.');
+            log('>> ' + msg.substr(0, 10) + '..: OK tweet messages.');
         }
         if (error) {
+            log('>> ' + msg.substr(0, 10) + '..: NG tweet messages.');
             log('NG tweet message:', error);
         }
+        repeater('tweet', msg);
     });
-    repeat('tweet', msg);
 }
 
-function retweetLatest(keywords) {
+function retweetLatest(keywords, repeater) {
     const query = {q: keywords, count: 10, result_type: "recent"};
 
     T.get('search/tweets', query, (error, data, response) => {
@@ -34,15 +35,15 @@ function retweetLatest(keywords) {
             var retweetId = data.statuses[0].id_str;
             T.post('statuses/retweet/' + retweetId, { }, (error, data, response) => {
                 if (error) {
-                    log('NG RT: ' + keywords, error);
+                    log('>> ' + keywords + ': NG RT', error);
                 } else if (response) {
-                    log('OK RT: ' + keywords);
+                    log('>> ' + keywords + ': OK RT', error);
                 }
+                repeater('retweet', keywords);
             });
         } else {
             log('NG with your hashtag search: ' + keywords, error);
         }
-        repeat('retweet', keywords);
     });
 }
 
@@ -50,10 +51,8 @@ function getRandomMin(min, max) {
     return Math.floor( Math.random() * (max + 1 - min) ) + min;
 }
 
-function repeat(type, content) {
+const repeater = (type, content) => {
     let random = 3600;
-    log('----------------------------');
-    log('>> ' + content);
     switch(type) {
         case 'tweet':
             random = getRandomMin(180, 360);
@@ -76,10 +75,10 @@ const searchWords = [
 ];
 
 for (const m of tweetMessages) {
-    tweetMessage(m);
+    tweetMessage(m, repeater);
 }
 
 for (const w of searchWords) {
-    retweetLatest(w);
+    retweetLatest(w, repeater);
 }
 
