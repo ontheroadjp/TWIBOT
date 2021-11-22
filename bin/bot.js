@@ -2,6 +2,7 @@ const app = require('../app');
 const Twit = require('twit');
 const CronJob = require('cron').CronJob;
 const moment = require('moment');
+moment.locale('ja');
 
 const T = new Twit({
     consumer_key: app.get('options').key,
@@ -11,17 +12,18 @@ const T = new Twit({
 });
 
 function log(msg) {
-    console.log(new Date() + ": " + msg);
+    const m = moment();
+    const date = m.format('YYYYMMDD-HH:mm:ss');
+    console.log(date + ": " + msg);
 }
 
 function tweetMessage(msg, repeater) {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
         if (response) {
-            log('>> ' + msg.substr(0, 10) + '..: OK tweet messages.');
+            log('>> OK: ' + msg.substr(0, 20) + '.. tweet messages.');
         }
         if (error) {
-            log('>> ' + msg.substr(0, 10) + '..: NG tweet messages.');
-            log('NG tweet message:', error);
+            log('>> NG: ' + msg.substr(0, 20) + '.. tweet messages.');
         }
         repeater('tweet', msg);
     });
@@ -35,9 +37,9 @@ function retweetLatest(keywords, repeater) {
             var retweetId = data.statuses[0].id_str;
             T.post('statuses/retweet/' + retweetId, { }, (error, data, response) => {
                 if (error) {
-                    log('>> ' + keywords + ': NG RT', error);
+                    log('>> NG RT: ' + keywords, error);
                 } else if (response) {
-                    log('>> ' + keywords + ': OK RT', error);
+                    log('>> OK RT: ' + keywords, error);
                 }
                 repeater('retweet', keywords);
             });
