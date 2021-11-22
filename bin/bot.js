@@ -1,5 +1,15 @@
+const app = require('../app');
 const Twit = require('twit');
-const T = new Twit(require('./config.js'));
+const CronJob = require('cron').CronJob;
+const moment = require('moment');
+//const T = new Twit(require('./config.js'));
+
+const T = new Twit({
+    consumer_key: app.get('options').key,
+    consumer_secret: app.get('options').secret,
+    access_token: app.get('options').token,
+    access_token_secret: app.get('options').token_secret
+});
 
 function log(msg) {
     console.log(new Date() + ": " + msg);

@@ -4,7 +4,7 @@
   "description": "work with Twitter API 2.0",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bin/bot"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,9 @@
     "node": "16.x"
   },
   "dependencies": {
+    "cron": "^1.8.2",
+    "express": "^4.17.1",
+    "moment": "^2.29.1",
     "twit": "^2.2.11"
   }
 }
