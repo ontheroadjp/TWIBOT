@@ -14,7 +14,6 @@ function tweetMessage(msg) {
             log('NG tweet message:', error);
         }
     });
-//    repeatTweetMessage(msg);
     repeat('tweet', msg);
 }
 
@@ -39,27 +38,8 @@ function retweetLatest(keywords) {
 }
 
 function getRandomMin(min, max) {
-//    var min = 60;
-//    var max = 180;
     return Math.floor( Math.random() * (max + 1 - min) ) + min;
 }
-
-// 1000 ms = 1 second, 1 sec * 60 = 1 min, 1 min * 60 = 1 hour --> 1000 * 60 * 60
-//function repeatTweetMessage(msg) {
-//    var random = getRandomMin();
-//    log('----------------------------');
-//    log('>> ' + msg);
-//    log('next Tweet will be ' + random + ' min after.');
-//    setTimeout(() => {tweetMessage(msg)}, 1000 * 60 * random);
-//}
-//
-//function repeatRetweet(keywords) {
-//    var random = getRandomMin();
-//    log('----------------------------');
-//    log('>> ' + keywords);
-//    log('next RT will be ' + random + ' min after.');
-//    setTimeout(() => {retweetLatest(keywords)}, 1000 * 60 * random);
-//}
 
 function repeat(type, content) {
     let random = 3600;
@@ -93,10 +73,4 @@ for (const m of tweetMessages) {
 for (const w of searchWords) {
     retweetLatest(w);
 }
-
-//tweetMessage('Are you still wearing out the mv and cp commands?\nhttps://ontheroadjp.github.io/Shell-Stash/');
-//retweetLatest('#vuejs');
-//retweetLatest('vuepress');
-//retweetLatest('#shellscript');
-//retweetLatest('#mediaarts');
 
