@@ -1,8 +1,11 @@
 const app = require('../app');
 const Twit = require('twit');
 const CronJob = require('cron').CronJob;
+
 const moment = require('moment');
 moment.locale('ja');
+const m = moment();
+const date = m.format('YYYYMMDD-HH:mm:ss');
 
 const T = new Twit({
     consumer_key: app.get('options').key,
@@ -11,10 +14,12 @@ const T = new Twit({
     access_token_secret: app.get('options').token_secret
 });
 
+
+const fs = require('fs');
+fs.writeFileSync('twibot.log', '[' + date + '] start...\n');
+
 function log(msg) {
-    const m = moment();
-    const date = m.format('YYYYMMDD-HH:mm:ss');
-    console.log(date + ": " + msg);
+    fs.appendFileSync('twibot.log', '[' + date + '] ' + msg + '\n');
 }
 
 function tweetMessage(msg, repeater) {
