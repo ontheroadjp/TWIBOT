@@ -1,7 +1,5 @@
 const app = require('../app');
 const Twit = require('twit');
-const CronJob = require('cron').CronJob;
-
 const moment = require('moment');
 
 const T = new Twit({
@@ -11,7 +9,6 @@ const T = new Twit({
     access_token_secret: app.get('options').token_secret
 });
 
-
 console.log('start...');
 
 function log (msg) {
@@ -20,34 +17,38 @@ function log (msg) {
     console.log('twibot.log', '[' + date + '] ' + msg);
 }
 
-function tweetMessage(msg) {
+function getRandomInt(min, max) {
+    return Math.floor( Math.random() * (max + 1 - min) ) + min;
+}
+
+function tweet(msg) {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
         if (response) {
-            log('>> OK: ' + msg.substr(0, 20) + '.. tweet messages.');
+            log('>> OK: ' + msg.substr(0, 20));
         } else if (error) {
-            log('>> NG: ' + msg.substr(0, 20) + '.. tweet messages.');
+            log('>> NG: ' + msg.substr(0, 20));
         }
         const random = getRandomInt(180, 360);
-        setTimeout(() => {tweetMessage(msg)}, 1000 * 60 * random);
+        setTimeout(() => {tweet(msg)}, 1000 * 60 * random);
         log('next will be ' + random + ' min after.');
     });
 }
 
-function retweetLatest(keywords) {
+function retweet(keywords) {
     const query = {q: keywords, count: 10, result_type: "recent"};
 
     T.get('search/tweets', query, (error, data, response) => {
         if (!error) {
             var retweetId = data.statuses[0].id_str;
             T.post('statuses/retweet/' + retweetId, { }, (error, data, response) => {
-                if (error) {
+                if (response) {
+                    log('>> OK RT: ' + keywords);
+                } else if (error) {
                     log('>> NG RT: ' + keywords, error);
-                } else if (response) {
-                    log('>> OK RT: ' + keywords, error);
                 }
 
                 const random = getRandomInt(60, 90);
-                setTimeout(() => {retweetLatest(keywords)}, 1000 * 60 * random);
+                setTimeout(() => {retweet(keywords)}, 1000 * 60 * random);
                 log('next will be ' + random + ' min after.');
             });
         } else {
@@ -56,26 +57,6 @@ function retweetLatest(keywords) {
     });
 }
 
-function getRandomInt(min, max) {
-    return Math.floor( Math.random() * (max + 1 - min) ) + min;
-}
-
-//function repeater(type, content) {
-//    let random = 60;
-//    switch(type) {
-//        case 'tweet':
-//            random = getRandomInt(180, 360);
-//            setTimeout(() => {tweetMessage(content)}, 1000 * 60 * random);
-//            break;
-//        case 'retweet':
-////            random = getRandomInt(60, 180);
-//            random = getRandomInt(1, 5);
-//            setTimeout(() => {retweetLatest(content)}, 1000 * 60 * random);
-//            break;
-//    }
-//    log('next will be ' + random + ' min after.');
-//}
-//
 const tweetMessages = [
     'Are you still wearing out the mv and cp commands?\nhttps://ontheroadjp.github.io/Shell-Stash/'
 ];
@@ -85,10 +66,10 @@ const searchWords = [
 ];
 
 for (const m of tweetMessages) {
-    tweetMessage(m);
+    tweet(m);
 }
 
 for (const w of searchWords) {
-    retweetLatest(w);
+    retweet(w);
 }
 
