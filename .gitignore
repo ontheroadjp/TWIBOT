@@ -3,6 +3,7 @@ config.js
 local_run
 run
 twibot.log
+bk_*
 
 # General
 .DS_Store
