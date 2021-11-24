@@ -57,7 +57,7 @@ function getRandomInt(min, max) {
     return Math.floor( Math.random() * (max + 1 - min) ) + min;
 }
 
-function repeater(type, content) => {
+function repeater(type, content) {
     let random = 60;
     switch(type) {
         case 'tweet':
