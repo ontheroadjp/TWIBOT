@@ -1,11 +1,8 @@
 const app = require('../app');
-const fs = require('fs');
 const Twit = require('twit');
 const CronJob = require('cron').CronJob;
 
 const moment = require('moment');
-const m = moment().locale('ja');
-const date = m.format('YYYYMMDD-HH:mm:ss');
 
 const T = new Twit({
     consumer_key: app.get('options').key,
@@ -15,25 +12,28 @@ const T = new Twit({
 });
 
 
-fs.writeFileSync('twibot.log', '[' + date + '] start...\n');
+console.log('start...');
 
 function log (msg) {
-    fs.appendFileSync('twibot.log', '[' + date + '] ' + msg + '\n');
+    const m = moment()
+    const date = m.locale('ja').format('YYYYMMDD-HH:mm:ss');
+    console.log('twibot.log', '[' + date + '] ' + msg);
 }
 
-function tweetMessage(msg, repeater) {
+function tweetMessage(msg) {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
         if (response) {
             log('>> OK: ' + msg.substr(0, 20) + '.. tweet messages.');
-        }
-        if (error) {
+        } else if (error) {
             log('>> NG: ' + msg.substr(0, 20) + '.. tweet messages.');
         }
-        repeater('tweet', msg);
+        const random = getRandomInt(180, 360);
+        setTimeout(() => {tweetMessage(msg)}, 1000 * 60 * random);
+        log('next will be ' + random + ' min after.');
     });
 }
 
-function retweetLatest(keywords, repeater) {
+function retweetLatest(keywords) {
     const query = {q: keywords, count: 10, result_type: "recent"};
 
     T.get('search/tweets', query, (error, data, response) => {
@@ -45,7 +45,10 @@ function retweetLatest(keywords, repeater) {
                 } else if (response) {
                     log('>> OK RT: ' + keywords, error);
                 }
-                repeater('retweet', keywords);
+
+                const random = getRandomInt(1, 5);
+                setTimeout(() => {retweetLatest(keywords)}, 1000 * 60 * random);
+                log('next will be ' + random + ' min after.');
             });
         } else {
             log('NG with your hashtag search: ' + keywords, error);
@@ -57,21 +60,22 @@ function getRandomInt(min, max) {
     return Math.floor( Math.random() * (max + 1 - min) ) + min;
 }
 
-function repeater(type, content) {
-    let random = 60;
-    switch(type) {
-        case 'tweet':
-            random = getRandomInt(180, 360);
-            setTimeout(() => {tweetMessage(content)}, 1000 * 60 * random);
-            break;
-        case 'retweet':
-            random = getRandomInt(60, 180);
-            setTimeout(() => {retweetLatest(content)}, 1000 * 60 * random);
-            break;
-    }
-    log('next will be ' + random + ' min after.');
-}
-
+//function repeater(type, content) {
+//    let random = 60;
+//    switch(type) {
+//        case 'tweet':
+//            random = getRandomInt(180, 360);
+//            setTimeout(() => {tweetMessage(content)}, 1000 * 60 * random);
+//            break;
+//        case 'retweet':
+////            random = getRandomInt(60, 180);
+//            random = getRandomInt(1, 5);
+//            setTimeout(() => {retweetLatest(content)}, 1000 * 60 * random);
+//            break;
+//    }
+//    log('next will be ' + random + ' min after.');
+//}
+//
 const tweetMessages = [
     'Are you still wearing out the mv and cp commands?\nhttps://ontheroadjp.github.io/Shell-Stash/'
 ];
@@ -81,10 +85,10 @@ const searchWords = [
 ];
 
 for (const m of tweetMessages) {
-    tweetMessage(m, repeater);
+    tweetMessage(m);
 }
 
 for (const w of searchWords) {
-    retweetLatest(w, repeater);
+    retweetLatest(w);
 }
 
