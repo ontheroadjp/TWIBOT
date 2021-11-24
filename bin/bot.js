@@ -1,10 +1,10 @@
 const app = require('../app');
+const fs = require('fs');
 const Twit = require('twit');
 const CronJob = require('cron').CronJob;
 
 const moment = require('moment');
-moment.locale('ja');
-const m = moment();
+const m = moment().locale('ja');
 const date = m.format('YYYYMMDD-HH:mm:ss');
 
 const T = new Twit({
@@ -15,10 +15,9 @@ const T = new Twit({
 });
 
 
-const fs = require('fs');
 fs.writeFileSync('twibot.log', '[' + date + '] start...\n');
 
-function log(msg) {
+function log (msg) {
     fs.appendFileSync('twibot.log', '[' + date + '] ' + msg + '\n');
 }
 
@@ -54,19 +53,19 @@ function retweetLatest(keywords, repeater) {
     });
 }
 
-function getRandomMin(min, max) {
+function getRandomInt(min, max) {
     return Math.floor( Math.random() * (max + 1 - min) ) + min;
 }
 
-const repeater = (type, content) => {
-    let random = 3600;
+function repeater(type, content) => {
+    let random = 60;
     switch(type) {
         case 'tweet':
-            random = getRandomMin(180, 360);
+            random = getRandomInt(180, 360);
             setTimeout(() => {tweetMessage(content)}, 1000 * 60 * random);
             break;
         case 'retweet':
-            random = getRandomMin(60, 180);
+            random = getRandomInt(60, 180);
             setTimeout(() => {retweetLatest(content)}, 1000 * 60 * random);
             break;
     }
