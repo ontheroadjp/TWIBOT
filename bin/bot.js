@@ -46,7 +46,7 @@ function retweetLatest(keywords) {
                     log('>> OK RT: ' + keywords, error);
                 }
 
-                const random = getRandomInt(1, 5);
+                const random = getRandomInt(60, 90);
                 setTimeout(() => {retweetLatest(keywords)}, 1000 * 60 * random);
                 log('next will be ' + random + ' min after.');
             });
