@@ -1,7 +1,8 @@
 node_modules
 config.js
 local_run
-twibot_local_run
+run
+twibot.log
 
 # General
 .DS_Store
