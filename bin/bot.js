@@ -23,10 +23,10 @@ function getRandomInt(min, max) {
 
 function tweet(msg) {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
-        if (response) {
-            log('>> OK: ' + msg.substr(0, 20));
-        } else if (error) {
+        if (error) {
             log('>> NG: ' + msg.substr(0, 20));
+        } else if (response) {
+            log('>> OK: ' + msg.substr(0, 20));
         }
         const random = getRandomInt(180, 360);
         setTimeout(() => {tweet(msg)}, 1000 * 60 * random);
@@ -41,10 +41,10 @@ function retweet(keywords) {
         if (!error) {
             var retweetId = data.statuses[0].id_str;
             T.post('statuses/retweet/' + retweetId, { }, (error, data, response) => {
-                if (response) {
-                    log('>> OK RT: ' + keywords);
-                } else if (error) {
+                if (error) {
                     log('>> NG RT: ' + keywords, error);
+                } else if (response) {
+                    log('>> OK RT: ' + keywords);
                 }
 
                 const random = getRandomInt(60, 90);
@@ -62,7 +62,16 @@ const tweetMessages = [
 ];
 
 const searchWords = [
-    '#vuejs', 'vuepress', '#shellscript', '#mediaarts'
+    '#vuejs',
+    '#vuepress',
+    '#nodejs',
+    '#laravel',
+    '#webpack',
+    '#javascript',
+    '#es6',
+    '#shellscript',
+    '#frontend',
+    '#mediaarts'
 ];
 
 for (const m of tweetMessages) {
