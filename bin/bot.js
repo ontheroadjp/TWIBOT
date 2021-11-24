@@ -1,11 +1,8 @@
 const app = require('../app');
-const fs = require('fs');
 const Twit = require('twit');
 const CronJob = require('cron').CronJob;
 
 const moment = require('moment');
-const m = moment().locale('ja');
-const date = m.format('YYYYMMDD-HH:mm:ss');
 
 const T = new Twit({
     consumer_key: app.get('options').key,
@@ -15,10 +12,13 @@ const T = new Twit({
 });
 
 
-fs.writeFileSync('twibot.log', '[' + date + '] start...\n');
+console.log('start...');
 
 function log (msg) {
-    fs.appendFileSync('twibot.log', '[' + date + '] ' + msg + '\n');
+    const m = moment()
+    const date = m.locale('ja').format('YYYYMMDD-HH:mm:ss');
+//    const date = m.format('YYYYMMDD-HH:mm:ss');
+    console.log('twibot.log', '[' + date + '] ' + msg);
 }
 
 function tweetMessage(msg, repeater) {
@@ -33,7 +33,8 @@ function tweetMessage(msg, repeater) {
     });
 }
 
-function retweetLatest(keywords, repeater) {
+//function retweetLatest(keywords, repeater) {
+function retweetLatest(keywords) {
     const query = {q: keywords, count: 10, result_type: "recent"};
 
     T.get('search/tweets', query, (error, data, response) => {
@@ -45,7 +46,17 @@ function retweetLatest(keywords, repeater) {
                 } else if (response) {
                     log('>> OK RT: ' + keywords, error);
                 }
-                repeater('retweet', keywords);
+//                repeater('retweet', keywords);
+
+
+                let random = 60;
+            //            random = getRandomInt(60, 180);
+                random = getRandomInt(1, 5);
+                setTimeout(() => {retweetLatest(keywords)}, 1000 * 60 * random);
+                log('next will be ' + random + ' min after.');
+
+
+
             });
         } else {
             log('NG with your hashtag search: ' + keywords, error);
@@ -65,7 +76,8 @@ function repeater(type, content) {
             setTimeout(() => {tweetMessage(content)}, 1000 * 60 * random);
             break;
         case 'retweet':
-            random = getRandomInt(60, 180);
+//            random = getRandomInt(60, 180);
+            random = getRandomInt(1, 5);
             setTimeout(() => {retweetLatest(content)}, 1000 * 60 * random);
             break;
     }
@@ -85,6 +97,7 @@ for (const m of tweetMessages) {
 }
 
 for (const w of searchWords) {
-    retweetLatest(w, repeater);
+//    retweetLatest(w, repeater);
+    retweetLatest(w);
 }
 
