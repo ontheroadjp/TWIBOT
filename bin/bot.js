@@ -12,10 +12,11 @@ const T = new Twit({
 const fs = require('fs');
 const vm = require('vm');
 
-let interval_between_tweet_min = 120
-let interval_between_tweet_max = 180
-let interval_between_retweet_min = 60
-let interval_between_retweet_max = 180
+const CONFIG_FILE = 'config.js';
+let interval_between_tweet_min = 120;
+let interval_between_tweet_max = 180;
+let interval_between_retweet_min = 60;
+let interval_between_retweet_max = 180;
 let timers = {};
 
 log('start...');
@@ -49,11 +50,11 @@ function tweet(msg) {
 }
 
 function retweet(keywords) {
-    const query = {q: keywords, count: 10, result_type: "recent"};
+    const query = {q: '#' + keywords, count: 10, result_type: "recent"};
 
     T.get('search/tweets', query, (error, data, response) => {
         if (!error) {
-            var retweetId = data.statuses[0].id_str;
+            const retweetId = data.statuses[0].id_str;
             T.post('statuses/retweet/' + retweetId, { }, (error, data, response) => {
                 const st = error ? 'NG' : 'OK';
                 log('>> ' + st + ': ' + keywords);
@@ -61,10 +62,10 @@ function retweet(keywords) {
                 const min = interval_between_retweet_min;
                 const max = interval_between_retweet_max;
                 const random = getRandomInt(min, max);
-                timeoutObj = setTimeout(() => {retweet(keywords)}, 1000 * 60 * random);
+                timer = setTimeout(() => {retweet(keywords)}, 1000 * 60 * random);
 
                 clearTimeout(timers[keywords]);
-                timers[keywords] = timeoutObj;
+                timers[keywords] = timer;
 
                 log('next will be ' + random + ' min after.');
             });
@@ -88,24 +89,18 @@ function loadObject (file, callback) {
     fs.watchFile(file, load);
 }
 
-loadObject('config.js', (obj) => {
-    interval_between_tweet_min = obj().interval_between_tweet_min;
-    interval_between_tweet_max = obj().interval_between_tweet_max;
-    interval_between_retweet_min = obj().interval_between_retweet_min;
-    interval_between_retweet_max = obj().interval_between_retweet_max;
+loadObject(CONFIG_FILE, (obj) => {
+    interval_between_tweet_min      = obj().interval_between_tweet_min;
+    interval_between_tweet_max      = obj().interval_between_tweet_max;
+    interval_between_retweet_min    = obj().interval_between_retweet_min;
+    interval_between_retweet_max    = obj().interval_between_retweet_max;
 
     for (const m of obj().tweetMessages) {
-        if( timers[m] == null ) {
-            tweet(m);
-        }
+        timers[m] == null ?  tweet(m) : '';
     }
 
-    for (let w of obj().searchWords) {
-        if( timers[w] == null ) {
-            retweet(w);
-        }
+    for (let w of obj().hashtags) {
+        timers[w] == null ?  retweet(w) : '';
     }
-    console.log('Waiting Tweets: ' + Object.keys(timers).length)
+    log('Waiting Tweets: ' + Object.keys(timers).length)
 });
-
-
