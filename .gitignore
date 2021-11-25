@@ -4,6 +4,7 @@ local_run
 run
 twibot.log
 bk_*
+timer.json
 
 # General
 .DS_Store
