@@ -87,7 +87,15 @@ function loadObject (file, callback) {
 
 loadObject(CONFIG_FILE, (obj) => {
     conf = obj;
-    timers = JSON.parse(fs.readFileSync(TIMER_FILE, 'utf8'));
+    if( fs.existsSync(TIMER_FILE) ) {
+        timers = JSON.parse(fs.readFileSync(TIMER_FILE, 'utf8'));
+    } else {
+        try{
+            fs.writeFileSync(TIMER_FILE, "{}");
+        } catch(e){
+            console.log(e.message);
+        }
+    }
 
     for (const content of conf().tweetMessages) {
         dispatch(tweet, content);
