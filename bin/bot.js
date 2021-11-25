@@ -54,7 +54,7 @@ const tweet = (msg) => {
 }
 
 const retweet = (hash) => {
-    const query = {q: hash, count: 10, result_type: "recent"};
+    const query = {q: '#' + hash, count: 10, result_type: "recent"};
     T.get('search/tweets', query, (error, data, response) => {
         if (!error) {
             const retweetId = data.statuses[0].id_str;
