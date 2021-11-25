@@ -9,7 +9,17 @@ const T = new Twit({
     access_token_secret: app.get('options').token_secret
 });
 
-console.log('start...');
+const fs = require('fs');
+const vm = require('vm');
+
+const CONFIG_FILE = 'config.js';
+let interval_between_tweet_min = 120;
+let interval_between_tweet_max = 180;
+let interval_between_retweet_min = 60;
+let interval_between_retweet_max = 180;
+let timers = {};
+
+log('start...');
 
 function log (msg) {
     const m = moment()
@@ -23,32 +33,40 @@ function getRandomInt(min, max) {
 
 function tweet(msg) {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
-        if (error) {
-            log('>> NG: ' + msg.substr(0, 20));
-        } else if (response) {
-            log('>> OK: ' + msg.substr(0, 20));
-        }
-        const random = getRandomInt(180, 360);
-        setTimeout(() => {tweet(msg)}, 1000 * 60 * random);
+        const st = error ? 'NG' : 'OK';
+        log('>> ' + st + ': ' + msg.substr(0,20));
+
+        const min = interval_between_tweet_min;
+        const max = interval_between_tweet_max;
+
+        const random = getRandomInt(min, max);
+        const timeoutObj = setTimeout(() => {tweet(msg)}, 1000 * 60 * random);
+
+        clearTimeout(timers[msg]);
+        timers[msg] = timeoutObj;
+
         log('next will be ' + random + ' min after.');
     });
 }
 
 function retweet(keywords) {
-    const query = {q: keywords, count: 10, result_type: "recent"};
+    const query = {q: '#' + keywords, count: 10, result_type: "recent"};
 
     T.get('search/tweets', query, (error, data, response) => {
         if (!error) {
-            var retweetId = data.statuses[0].id_str;
+            const retweetId = data.statuses[0].id_str;
             T.post('statuses/retweet/' + retweetId, { }, (error, data, response) => {
-                if (error) {
-                    log('>> NG RT: ' + keywords, error);
-                } else if (response) {
-                    log('>> OK RT: ' + keywords);
-                }
+                const st = error ? 'NG' : 'OK';
+                log('>> ' + st + ': ' + keywords);
 
-                const random = getRandomInt(60, 90);
-                setTimeout(() => {retweet(keywords)}, 1000 * 60 * random);
+                const min = interval_between_retweet_min;
+                const max = interval_between_retweet_max;
+                const random = getRandomInt(min, max);
+                timer = setTimeout(() => {retweet(keywords)}, 1000 * 60 * random);
+
+                clearTimeout(timers[keywords]);
+                timers[keywords] = timer;
+
                 log('next will be ' + random + ' min after.');
             });
         } else {
@@ -57,28 +75,32 @@ function retweet(keywords) {
     });
 }
 
-const tweetMessages = [
-    'Are you still wearing out the mv and cp commands?\nhttps://ontheroadjp.github.io/Shell-Stash/'
-];
-
-const searchWords = [
-    '#vuejs',
-    '#vuepress',
-    '#nodejs',
-    '#laravel',
-    '#webpack',
-    '#javascript',
-    '#es6',
-    '#shellscript',
-    '#frontend',
-    '#mediaarts'
-];
-
-for (const m of tweetMessages) {
-    tweet(m);
+function loadObject (file, callback) {
+    const load = () => {
+        const sandbox = {};
+        fs.readFile(file, (err, data) => {
+            const script = vm.createScript(data, file);
+            script.runInNewContext(sandbox);
+            obj = sandbox.exports;
+            callback(sandbox.exports);
+        });
+    }
+    load();
+    fs.watchFile(file, load);
 }
 
-for (const w of searchWords) {
-    retweet(w);
-}
+loadObject(CONFIG_FILE, (obj) => {
+    interval_between_tweet_min      = obj().interval_between_tweet_min;
+    interval_between_tweet_max      = obj().interval_between_tweet_max;
+    interval_between_retweet_min    = obj().interval_between_retweet_min;
+    interval_between_retweet_max    = obj().interval_between_retweet_max;
 
+    for (const m of obj().tweetMessages) {
+        timers[m] == null ?  tweet(m) : '';
+    }
+
+    for (let w of obj().hashtags) {
+        timers[w] == null ?  retweet(w) : '';
+    }
+    log('Waiting Tweets: ' + Object.keys(timers).length)
+});
