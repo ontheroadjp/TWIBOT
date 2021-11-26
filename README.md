@@ -1,12 +1,12 @@
 # Tweet Bot
 
-This is a Twitter Bot work with Twitter API v2.0. TWIBOT is a program that automatically tweets and retweets. 
+This is a Twitter Bot working with Twitter API v2.0 based on Node.js. TWIBOT is a program that automatically tweets and retweets. 
 
 
 
 ### Interval to repeat a tweet/retweet
 
-The interval for tweeting or retweeting will be randomly executed within the specified range of time.
+The interval between tweets is not constant. The interval for each tweeting or retweeting will be randomly executed within the specified range of time.
 
 
 
@@ -145,3 +145,6 @@ $ git push heroku master
 ```
 
 Execute the ``heroku open`` command to launch a web browser. If you see the string ``This is a Twitter-bot application.``, you're all done!
+
+
+
