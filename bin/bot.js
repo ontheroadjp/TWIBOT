@@ -42,7 +42,7 @@ function setTimer(action, key, interval) {
                         .add(interval, 'minutes')
                         .format('YYYY-MM-DD HH:mm:ss');
     fs.writeFileSync(TIMER_FILE, JSON.stringify(timers));
-//    log('next will be ' + interval + ' min after.');
+    log(' next will be ' + interval + ' min after\n', false);
 }
 
 function getTimer(key) {
@@ -52,7 +52,7 @@ function getTimer(key) {
 const tweet = (msg) => {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
         const st = error ? 'NG' : 'OK';
-        log('>> ' + st + ': ' + msg.substr(0,20));
+        log('>> ' + st + ': ' + msg.substr(0,30));
         const min = conf().interval_between_tweet_min;
         const max = conf().interval_between_tweet_max;
         setTimer(tweet, msg, getRandomInt(min, max));
@@ -70,7 +70,7 @@ const retweet = (hash) => {
                 const min = conf().interval_between_retweet_min;
                 const max = conf().interval_between_retweet_max;
                 setTimer(retweet, hash, getRandomInt(min, max));
-                log(' (next:' + getRandomInt(min, max) + ' min after)\n', false);
+//                log(' (next:' + getRandomInt(min, max) + ' min after)\n', false);
             });
         } else {
             log('NG with your hashtag search: ' + hash + ' - ' + error + '\n');
@@ -116,7 +116,7 @@ loadObject(CONFIG_FILE, (obj) => {
 });
 
 function dispatch(action, content) {
-    log('call dispatch: ' + content + ', timer: ' + timers[content] + '\n');
+    log('call dispatch: ' + content.substr(0,30) + ' => ' + timers[content] + '\n');
     if( timers[content] == null ) {
         action(content);
     } else {
