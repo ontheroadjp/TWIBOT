@@ -19,10 +19,16 @@ let timers = {};
 
 log('start...');
 
-function log (msg) {
+function log (msg, date = true) {
     const m = moment()
-    const date = m.locale('ja').format('YYYYMMDD-HH:mm:ss');
-    console.log('twibot.log', '[' + date + '] ' + msg);
+    if(date) {
+        const date = m.locale('ja').format('YYYYMMDD-HH:mm:ss');
+        process.stdout.write('[' + date + '] ' + msg)
+    } else {
+        process.stdout.write(msg)
+    }
+
+    //console.log('[' + date + '] ' + msg);
 }
 
 function getRandomInt(min, max) {
@@ -36,7 +42,7 @@ function setTimer(action, key, interval) {
                         .add(interval, 'minutes')
                         .format('YYYY-MM-DD HH:mm:ss');
     fs.writeFileSync(TIMER_FILE, JSON.stringify(timers));
-    log('next will be ' + interval + ' min after.');
+    log(' next will be ' + interval + ' min after\n', false);
 }
 
 function getTimer(key) {
@@ -46,7 +52,7 @@ function getTimer(key) {
 const tweet = (msg) => {
     T.post('statuses/update', {status: msg }, (error, data, response) => {
         const st = error ? 'NG' : 'OK';
-        log('>> ' + st + ': ' + msg.substr(0,20));
+        log('>> ' + st + ': ' + msg.substr(0,30));
         const min = conf().interval_between_tweet_min;
         const max = conf().interval_between_tweet_max;
         setTimer(tweet, msg, getRandomInt(min, max));
@@ -64,9 +70,10 @@ const retweet = (hash) => {
                 const min = conf().interval_between_retweet_min;
                 const max = conf().interval_between_retweet_max;
                 setTimer(retweet, hash, getRandomInt(min, max));
+//                log(' (next:' + getRandomInt(min, max) + ' min after)\n', false);
             });
         } else {
-            log('NG with your hashtag search: ' + hash, error);
+            log('NG with your hashtag search: ' + hash + ' - ' + error + '\n');
         }
     });
 }
@@ -105,11 +112,11 @@ loadObject(CONFIG_FILE, (obj) => {
         dispatch(retweet, content);
     }
 
-    log('Waiting Tweets: ' + Object.keys(timers).length)
+    log('Waiting Tweets: ' + Object.keys(timers).length + '\n')
 });
 
 function dispatch(action, content) {
-    log('call dispatch: ' + content + ', timer: ' + timers[content]);
+    log('call dispatch: ' + content.substr(0,30) + ' => ' + timers[content] + '\n');
     if( timers[content] == null ) {
         action(content);
     } else {
