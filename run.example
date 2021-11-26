@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export TWIBOT_API_KEY=xxxxxxx
+export TWIBOT_API_KEY_SECRET=xxxxxxx
+export TWIBOT_ACCESS_TOKEN=xxxxxxx
+export TWIBOT_ACCESS_TOKEN_SECRET=xxxxxxx
+
+npm start
+
+exit 0
